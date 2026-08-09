@@ -123,6 +123,34 @@ app.MapGet("/teams/{name}", (string name, bool? withForm) =>
     });
 });
 
+TeamSummary SummarizeTeam(string name)
+{
+    var played = data.Matches
+        .Where(m => m.Played && m.HomeScore is not null && m.AwayScore is not null)
+        .Where(m => m.Home.Equals(name, StringComparison.OrdinalIgnoreCase)
+                 || m.Away.Equals(name, StringComparison.OrdinalIgnoreCase))
+        .ToList();
+
+    int won = 0, drawn = 0, lost = 0, goalsFor = 0, goalsAgainst = 0;
+
+    foreach (var m in played)
+    {
+        var isHome = m.Home.Equals(name, StringComparison.OrdinalIgnoreCase);
+        var scored = isHome ? m.HomeScore!.Value : m.AwayScore!.Value;
+        var conceded = isHome ? m.AwayScore!.Value : m.HomeScore!.Value;
+
+        goalsFor += scored;
+        goalsAgainst += conceded;
+
+        if (scored > conceded) won++;
+        else if (scored == conceded) drawn++;
+        else lost++;
+    }
+
+    return new TeamSummary(name, played.Count, won, drawn, lost, goalsFor, goalsAgainst,
+                           goalsFor - goalsAgainst, won * 3 + drawn);
+}
+
 app.Run();
 
 static string Escape(string? value)
