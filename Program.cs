@@ -101,6 +101,8 @@ TeamSummary SummarizeTeam(string name)
                            goalsFor - goalsAgainst, won * 3 + drawn);
 }
 
+app.MapGet("/teams/{name}", (string name) => Results.Ok(SummarizeTeam(name)));
+
 app.Run();
 
 static string Escape(string? value)
