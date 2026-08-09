@@ -19,6 +19,13 @@ app.MapGet("/fixtures", (string? team, bool? played) =>
     return Results.Ok(q);
 });
 
+app.MapGet("/table/position", () =>
+{
+    var arsenal = data.Standings
+        .FirstOrDefault(s => s.Team.Equals("Arsenal", StringComparison.OrdinalIgnoreCase));
+    return arsenal is null ? Results.NotFound() : Results.Ok(arsenal);
+});
+
 app.Run();
 
 record Match(string Season, int Matchday, string Date, string Home, string Away,
