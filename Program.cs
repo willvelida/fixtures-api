@@ -41,6 +41,38 @@ app.MapGet("/fixtures/export", () =>
     return Results.File(Encoding.UTF8.GetBytes(csv.ToString()), "text/csv", "fixtures.csv");
 });
 
+app.MapGet("/table/position", () =>
+{
+    var arsenal = data.Standings
+        .FirstOrDefault(s => s.Team.Equals("Arsenal", StringComparison.OrdinalIgnoreCase));
+    return arsenal is null ? Results.NotFound() : Results.Ok(arsenal);
+});
+
+app.MapGet("/fixtures/form", () =>
+{
+    const string team = "Arsenal";
+
+    var recent = data.Matches
+        .Where(m => m.Played && m.HomeScore is not null && m.AwayScore is not null)
+        .Where(m => m.Home.Equals(team, StringComparison.OrdinalIgnoreCase)
+                 || m.Away.Equals(team, StringComparison.OrdinalIgnoreCase))
+        .OrderByDescending(m => DateOnly.Parse(m.Date))
+        .ThenByDescending(m => m.Matchday)
+        .Take(5)
+        .Reverse()
+        .ToList();
+
+    var form = string.Join("-", recent.Select(m =>
+    {
+        var isHome = m.Home.Equals(team, StringComparison.OrdinalIgnoreCase);
+        var scored = isHome ? m.HomeScore!.Value : m.AwayScore!.Value;
+        var conceded = isHome ? m.AwayScore!.Value : m.HomeScore!.Value;
+        return scored > conceded ? "W" : scored == conceded ? "D" : "L";
+    }));
+
+    return Results.Ok(new { team, form });
+});
+
 app.Run();
 
 static string Escape(string? value)
