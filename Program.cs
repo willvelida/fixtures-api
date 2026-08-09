@@ -48,10 +48,8 @@ app.MapGet("/table/position", () =>
     return arsenal is null ? Results.NotFound() : Results.Ok(arsenal);
 });
 
-app.MapGet("/fixtures/form", () =>
+string ComputeForm(string team)
 {
-    const string team = "Arsenal";
-
     var recent = data.Matches
         .Where(m => m.Played && m.HomeScore is not null && m.AwayScore is not null)
         .Where(m => m.Home.Equals(team, StringComparison.OrdinalIgnoreCase)
@@ -62,15 +60,19 @@ app.MapGet("/fixtures/form", () =>
         .Reverse()
         .ToList();
 
-    var form = string.Join("-", recent.Select(m =>
+    return string.Join("-", recent.Select(m =>
     {
         var isHome = m.Home.Equals(team, StringComparison.OrdinalIgnoreCase);
         var scored = isHome ? m.HomeScore!.Value : m.AwayScore!.Value;
         var conceded = isHome ? m.AwayScore!.Value : m.HomeScore!.Value;
         return scored > conceded ? "W" : scored == conceded ? "D" : "L";
     }));
+}
 
-    return Results.Ok(new { team, form });
+app.MapGet("/fixtures/form", () =>
+{
+    const string team = "Arsenal";
+    return Results.Ok(new { team, form = ComputeForm(team) });
 });
 
 TeamSummary SummarizeTeam(string name)
@@ -101,7 +103,25 @@ TeamSummary SummarizeTeam(string name)
                            goalsFor - goalsAgainst, won * 3 + drawn);
 }
 
-app.MapGet("/teams/{name}", (string name) => Results.Ok(SummarizeTeam(name)));
+app.MapGet("/teams/{name}", (string name, bool? withForm) =>
+{
+    var summary = SummarizeTeam(name);
+    if (withForm != true) return Results.Ok(summary);
+
+    return Results.Ok(new
+    {
+        summary.Team,
+        summary.Played,
+        summary.Won,
+        summary.Drawn,
+        summary.Lost,
+        summary.GoalsFor,
+        summary.GoalsAgainst,
+        summary.GoalDifference,
+        summary.Points,
+        Form = ComputeForm(name)
+    });
+});
 
 app.Run();
 
