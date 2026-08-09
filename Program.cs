@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Text;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,7 +21,35 @@ app.MapGet("/fixtures", (string? team, bool? played) =>
     return Results.Ok(q);
 });
 
+app.MapGet("/fixtures/export", () =>
+{
+    var csv = new StringBuilder();
+    csv.AppendLine("season,matchday,date,home,away,homeScore,awayScore,played");
+    foreach (var m in data.Matches)
+    {
+        csv.AppendLine(string.Join(',',
+            Escape(m.Season),
+            m.Matchday.ToString(CultureInfo.InvariantCulture),
+            Escape(m.Date),
+            Escape(m.Home),
+            Escape(m.Away),
+            m.HomeScore?.ToString(CultureInfo.InvariantCulture) ?? "",
+            m.AwayScore?.ToString(CultureInfo.InvariantCulture) ?? "",
+            m.Played ? "true" : "false"));
+    }
+
+    return Results.File(Encoding.UTF8.GetBytes(csv.ToString()), "text/csv", "fixtures.csv");
+});
+
 app.Run();
+
+static string Escape(string? value)
+{
+    if (string.IsNullOrEmpty(value)) return "";
+    if (value.Contains(',') || value.Contains('"') || value.Contains('\n') || value.Contains('\r'))
+        return $"\"{value.Replace("\"", "\"\"")}\"";
+    return value;
+}
 
 record Match(string Season, int Matchday, string Date, string Home, string Away,
              int? HomeScore, int? AwayScore, bool Played);
