@@ -10,3 +10,4 @@ var app = builder.Build();
 app.MapEndpointModules();
 
 app.Run();
+public partial class Program;
