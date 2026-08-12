@@ -1,0 +1,38 @@
+{
+  "$schema": "https://raw.githubusercontent.com/devcontainers/spec/main/schemas/devContainer.schema.json",
+  "name": "fixtures-api",
+  "image": "mcr.microsoft.com/devcontainers/dotnet:1-10.0",
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.12",
+      "installTools": false
+    }
+  },
+  "forwardPorts": [5259, 7088],
+  "portsAttributes": {
+    "5259": {
+      "label": "Fixtures API (http)",
+      "onAutoForward": "notify"
+    },
+    "7088": {
+      "label": "Fixtures API (https)",
+      "onAutoForward": "silent"
+    }
+  },
+  "postCreateCommand": "dotnet restore src/FixturesApi.csproj",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.csdevkit",
+        "ms-dotnettools.csharp",
+        "ms-python.python",
+        "humao.rest-client"
+      ],
+      "settings": {
+        "dotnet.defaultSolution": "disable"
+      }
+    }
+  },
+  "remoteUser": "vscode"
+}
