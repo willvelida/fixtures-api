@@ -1,0 +1,36 @@
+# Build artefacts
+**/bin/
+**/obj/
+**/out/
+**/publish/
+**/*.user
+**/*.suo
+
+# Docker / CI
+Dockerfile*
+.dockerignore
+docker-compose*.yml
+.github/
+
+# Source control & editors
+.git
+.gitignore
+.gitattributes
+.vs/
+.vscode/
+.idea/
+**/.DS_Store
+
+# Local dev config & secrets
+**/*.env
+**/.env
+**/secrets.json
+**/appsettings.*.Local.json
+
+# Docs, scripts and test output not needed by the image
+docs/
+scripts/
+LICENSE
+README.md
+**/TestResults/
+**/*.md
