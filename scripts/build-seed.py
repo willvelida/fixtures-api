@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 import json, re, pathlib
 
-DATA = pathlib.Path("data")
-OUT = pathlib.Path("seed"); OUT.mkdir(exist_ok=True)
+DATA = pathlib.Path("src/data")
+OUT = pathlib.Path("src/seed"); OUT.mkdir(exist_ok=True)
 MONTHS = {m: i for i, m in enumerate(
     ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], 1)}
 
